@@ -1,0 +1,39 @@
+name: Firmware CI/CD
+on:
+  pull_request:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: espressif/idf:release-v5.5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Build ESP32-WROOM-32D firmware
+        shell: bash
+        run: |
+          . "$IDF_PATH/export.sh"
+          idf.py set-target esp32
+          idf.py build
+          cp build/poc_ota.bin build/poc-ota.bin
+      - name: Upload CI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: poc-ota-${{ github.sha }}
+          path: |
+            build/poc-ota.bin
+            build/bootloader/bootloader.bin
+            build/partition_table/partition-table.bin
+            build/ota_data_initial.bin
+      - name: Publish tagged release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/poc-ota.bin
+          generate_release_notes: true
