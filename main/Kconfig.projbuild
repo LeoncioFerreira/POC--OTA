@@ -1,0 +1,15 @@
+menu "POC OTA configuration"
+config POC_WIFI_SSID
+    string "Wi-Fi SSID"
+    default ""
+config POC_WIFI_PASSWORD
+    string "Wi-Fi password"
+    default ""
+config POC_OTA_URL
+    string "OTA firmware URL"
+    default "https://github.com/LeoncioFerreira/POC--OTA/releases/latest/download/poc-ota.bin"
+config POC_OTA_CHECK_INTERVAL_SECONDS
+    int "OTA check interval in seconds"
+    range 30 86400
+    default 60
+endmenu
